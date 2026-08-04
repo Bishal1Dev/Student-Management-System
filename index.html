@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Management System</title>
+
+<style>
+/* ============================================================
+   General Styling
+============================================================ */
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #f4f7fb;
+    color: #333;
+}
+
+/* ============================================================
+   Navigation
+============================================================ */
+nav {
+    background: #1f2937;
+    color: white;
+    padding: 20px 25px;
+    font-size: 22px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#connectionStatus {
+    font-size: 13px;
+    font-weight: normal;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: #16a34a;
+}
+
+#connectionStatus.offline {
+    background: #dc2626;
+}
+
+/* ============================================================
+   Main Container
+============================================================ */
+.container {
+    padding: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ============================================================
+   Cards
+============================================================ */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.card h3 {
+    margin: 0 0 8px 0;
+    color: #2563eb;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card p {
+    font-size: 30px;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* ============================================================
+   Sections / Forms
+============================================================ */
+.section {
+    background: white;
+    margin-top: 25px;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.section h2 {
+    margin-top: 0;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.section-header h2 {
+    margin: 0;
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+input, select, button {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+input, select {
+    flex: 1;
+    min-width: 140px;
+}
+
+button {
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    border: none;
+    font-weight: 600;
+    transition: background 0.15s ease;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+button.secondary {
+    background: #6b7280;
+}
+button.secondary:hover {
+    background: #4b5563;
+}
+
+button.delete {
+    background: #dc2626;
+}
+button.delete:hover {
+    background: #b91c1c;
+}
+
+button.report {
+    background: #16a34a;
+}
+button.report:hover {
+    background: #15803d;
+}
+
+button.edit {
+    background: #d97706;
+}
+button.edit:hover {
+    background: #b45309;
+}
+
+/* ============================================================
+   Table
+============================================================ */
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+th {
+    background: #2563eb;
+    color: white;
+}
+
+tbody tr:hover {
+    background: #f9fafb;
+}
+
+.gpa-fail {
+    color: #dc2626;
+    font-weight: bold;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.empty-row td {
+    padding: 25px;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* ============================================================
+   Grades chips inside table
+============================================================ */
+.grade-chip {
+    display: inline-block;
+    background: #eef2ff;
+    color: #3730a3;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin: 2px;
+}
+
+/* ============================================================
+   Toast messages
+============================================================ */
+#toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 14px 20px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 999;
+    max-width: 320px;
+}
+
+#toast.success { background: #16a34a; }
+#toast.error { background: #dc2626; }
+
+/* ============================================================
+   Modal (report / edit)
+============================================================ */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    width: 90%;
+    max-width: 480px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.modal-large {
+    max-width: 950px;
+}
+
+.modal h2 {
+    margin-top: 0;
+}
+
+.modal .form-row {
+    margin-bottom: 10px;
+}
+
+.modal-close {
+    background: #6b7280;
+}
+
+.report-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.report-line strong {
+    color: #2563eb;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    table { font-size: 12px; }
+    nav { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+    <span>🎓 Student Management System</span>
+    <span id="connectionStatus">Connecting...</span>
+</nav>
+
+<div class="container">
+
+    <!-- Dashboard Cards -->
+    <div class="cards">
+        <div class="card">
+            <h3>Total Students</h3>
+            <p id="totalStudents">0</p>
+        </div>
+        <div class="card">
+            <h3>Average GPA</h3>
+            <p id="averageGPA">0</p>
+        </div>
+        <div class="card">
+            <h3>Avg Attendance</h3>
+            <p id="attendance">0%</p>
+        </div>
+        <div class="card">
+            <h3>Highest / Lowest GPA</h3>
+            <p style="font-size:20px;"><span id="highestGPA">0</span> / <span id="lowestGPA">0</span></p>
+        </div>
+    </div>
+
+    <!-- Add Student -->
+    <div class="section">
+        <h2>Add Student</h2>
+        <div class="form-row">
+            <input id="name" placeholder="Name">
+            <input id="age" type="number" placeholder="Age" min="0">
+            <input id="email" type="email" placeholder="Email">
+            <input id="course" placeholder="Course">
+            <button onclick="addStudent()">Add Student</button>
+        </div>
+    </div>
+
+    <!-- Student Table -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Students</h2>
+            <button onclick="viewAllReports()">📊 Total Report</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Course</th>
+                        <th>GPA</th>
+                        <th>Attendance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTable">
+                    <tr class="empty-row"><td colspan="6">Loading students...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Grade Section -->
+    <div class="section">
+        <h2>Add Grade</h2>
+        <div class="form-row">
+            <select id="gradeStudent"></select>
+            <input id="subject" placeholder="Subject">
+            <input id="marks" type="number" placeholder="Marks (0-100)" min="0" max="100">
+            <button onclick="addGrade()">Add Grade</button>
+        </div>
+    </div>
+
+    <!-- Attendance -->
+    <div class="section">
+        <h2>Attendance</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Present</th>
+                        <th>Absent</th>
+                        <th>Attendance %</th>
+                        <th>Mark Today</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceTable">
+                    <tr class="empty-row"><td colspan="6">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="section">
+        <h2>Statistics</h2>
+        <div id="statistics">Loading...</div>
+    </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Report Modal -->
+<div class="modal-overlay" id="reportModal">
+    <div class="modal">
+        <h2>Student Report</h2>
+        <div id="reportContent"></div>
+        <br>
+        <button class="modal-close" onclick="closeModal('reportModal')">Close</button>
+    </div>
+</div>
+
+<!-- Total Report Modal (all students at once) -->
+<div class="modal-overlay" id="allReportsModal">
+    <div class="modal modal-large">
+        <div class="section-header">
+            <h2>Total Report — All Students</h2>
+            <button class="secondary" onclick="printAllReports()">🖨️ Print</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Course</th>
+                        <th>GPA</th>
+                        <th>Attendance</th>
+                        <th>Grades</th>
+                    </tr>
+                </thead>
+                <tbody id="allReportsTable"></tbody>
+            </table>
+        </div>
+        <br>
+        <button class="modal-close" onclick="closeModal('allReportsModal')">Close</button>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <h2>Edit Student</h2>
+        <input type="hidden" id="editId">
+        <div class="form-row"><input id="editName" placeholder="Name"></div>
+        <div class="form-row"><input id="editAge" type="number" placeholder="Age"></div>
+        <div class="form-row"><input id="editEmail" type="email" placeholder="Email"></div>
+        <div class="form-row"><input id="editCourse" placeholder="Course"></div>
+        <div class="form-row">
+            <button onclick="saveEdit()">Save Changes</button>
+            <button class="modal-close" onclick="closeModal('editModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ================================================================
+// Helpers
+// ================================================================
+
+function showToast(message, type = "success") {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = type;
+    toast.style.display = "block";
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => { toast.style.display = "none"; }, 3000);
+}
+
+function setConnectionStatus(online) {
+    const el = document.getElementById("connectionStatus");
+    if (online) {
+        el.textContent = "🟢 Connected";
+        el.classList.remove("offline");
+    } else {
+        el.textContent = "🔴 Server unreachable";
+        el.classList.add("offline");
+    }
+}
+
+async function apiCall(url, options = {}) {
+    try {
+        const response = await fetch(url, options);
+        setConnectionStatus(true);
+        let data = {};
+        try { data = await response.json(); } catch (e) { /* no body */ }
+
+        if (!response.ok) {
+            const message = data.error || `Request failed (${response.status})`;
+            showToast(message, "error");
+            return { ok: false, data };
+        }
+        return { ok: true, data };
+    } catch (err) {
+        setConnectionStatus(false);
+        showToast("Cannot reach server. Is Flask running?", "error");
+        return { ok: false, data: null };
+    }
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove("active");
+}
+
+function openModal(id) {
+    document.getElementById(id).classList.add("active");
+}
+
+// ================================================================
+// Load Students
+// ================================================================
+
+async function loadStudents() {
+    const { ok, data: students } = await apiCall("/students");
+    if (!ok || !students) return;
+
+    const table = document.getElementById("studentTable");
+    const gradeSelect = document.getElementById("gradeStudent");
+    const attendanceTable = document.getElementById("attendanceTable");
+
+    table.innerHTML = "";
+    gradeSelect.innerHTML = "";
+    attendanceTable.innerHTML = "";
+
+    if (students.length === 0) {
+        table.innerHTML = `<tr class="empty-row"><td colspan="6">No students yet. Add one above.</td></tr>`;
+        gradeSelect.innerHTML = `<option value="">No students</option>`;
+        attendanceTable.innerHTML = `<tr class="empty-row"><td colspan="6">No students yet. Add one above.</td></tr>`;
+        return;
+    }
+
+    students.forEach(student => {
+        const gpaClass = student.gpa === 0 ? "gpa-fail" : "";
+
+        table.innerHTML += `
+            <tr>
+                <td>${student.id}</td>
+                <td>${escapeHtml(student.name)}</td>
+                <td>${escapeHtml(student.course)}</td>
+                <td class="${gpaClass}">${student.gpa}</td>
+                <td>${student.attendance_percent}%</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="edit" onclick="openEdit(${student.id})">Edit</button>
+                        <button class="delete" onclick="deleteStudent(${student.id})">Delete</button>
+                        <button class="report" onclick="viewReport(${student.id})">View Report</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        gradeSelect.innerHTML += `<option value="${student.id}">${escapeHtml(student.name)}</option>`;
+
+        attendanceTable.innerHTML += `
+            <tr>
+                <td>${student.id}</td>
+                <td>${escapeHtml(student.name)}</td>
+                <td>${student.attendance.present}</td>
+                <td>${student.attendance.absent}</td>
+                <td>${student.attendance_percent}%</td>
+                <td>
+                    <div class="action-buttons">
+                        <button onclick="markAttendance(${student.id}, 'present')">✅ Present</button>
+                        <button class="delete" onclick="markAttendance(${student.id}, 'absent')">❌ Absent</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function escapeHtml(str) {
+    if (str === undefined || str === null) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+// ================================================================
+// Add Student
+// ================================================================
+
+async function addStudent() {
+    const name = document.getElementById("name").value.trim();
+    const age = document.getElementById("age").value;
+    const email = document.getElementById("email").value.trim();
+    const course = document.getElementById("course").value.trim();
+
+    if (!name || !course) {
+        showToast("Name and Course are required", "error");
+        return;
+    }
+
+    const { ok } = await apiCall("/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, age: Number(age) || 0, email, course })
+    });
+
+    if (ok) {
+        showToast("Student added");
+        document.getElementById("name").value = "";
+        document.getElementById("age").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("course").value = "";
+        loadStudents();
+        loadStatistics();
+    }
+}
+
+// ================================================================
+// Edit Student
+// ================================================================
+
+let currentStudents = [];
+
+async function openEdit(id) {
+    const { ok, data: students } = await apiCall("/students");
+    if (!ok) return;
+    currentStudents = students;
+
+    const student = students.find(s => s.id === id);
+    if (!student) return;
+
+    document.getElementById("editId").value = student.id;
+    document.getElementById("editName").value = student.name;
+    document.getElementById("editAge").value = student.age;
+    document.getElementById("editEmail").value = student.email;
+    document.getElementById("editCourse").value = student.course;
+
+    openModal("editModal");
+}
+
+async function saveEdit() {
+    const id = document.getElementById("editId").value;
+    const name = document.getElementById("editName").value.trim();
+    const age = document.getElementById("editAge").value;
+    const email = document.getElementById("editEmail").value.trim();
+    const course = document.getElementById("editCourse").value.trim();
+
+    const { ok } = await apiCall(`/students/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, age: Number(age) || 0, email, course })
+    });
+
+    if (ok) {
+        showToast("Student updated");
+        closeModal("editModal");
+        loadStudents();
+        loadStatistics();
+    }
+}
+
+// ================================================================
+// Delete Student
+// ================================================================
+
+async function deleteStudent(id) {
+    if (!confirm("Delete this student? This cannot be undone.")) return;
+
+    const { ok } = await apiCall(`/students/${id}`, { method: "DELETE" });
+    if (ok) {
+        showToast("Student deleted");
+        loadStudents();
+        loadStatistics();
+    }
+}
+
+// ================================================================
+// Add Grade
+// ================================================================
+
+async function addGrade() {
+    const studentId = document.getElementById("gradeStudent").value;
+    const subject = document.getElementById("subject").value.trim();
+    const marks = document.getElementById("marks").value;
+
+    if (!studentId) {
+        showToast("Add a student first", "error");
+        return;
+    }
+    if (!subject || marks === "") {
+        showToast("Subject and Marks are required", "error");
+        return;
+    }
+
+    const { ok } = await apiCall("/grades", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            student_id: Number(studentId),
+            subject,
+            marks: Number(marks)
+        })
+    });
+
+    if (ok) {
+        showToast("Grade added");
+        document.getElementById("subject").value = "";
+        document.getElementById("marks").value = "";
+        loadStudents();
+        loadStatistics();
+    }
+}
+
+// ================================================================
+// Attendance
+// ================================================================
+
+async function markAttendance(studentId, status) {
+    const { ok } = await apiCall("/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_id: Number(studentId), status })
+    });
+
+    if (ok) {
+        showToast(`Marked ${status}`);
+        loadStudents();
+        loadStatistics();
+    }
+}
+
+// ================================================================
+// Statistics
+// ================================================================
+
+async function loadStatistics() {
+    const { ok, data } = await apiCall("/statistics");
+    if (!ok || !data) return;
+
+    document.getElementById("totalStudents").textContent = data.total_students;
+    document.getElementById("averageGPA").textContent = data.average_gpa;
+    document.getElementById("attendance").textContent = data.average_attendance + "%";
+    document.getElementById("highestGPA").textContent = data.highest_gpa;
+    document.getElementById("lowestGPA").textContent = data.lowest_gpa;
+
+    document.getElementById("statistics").innerHTML = `
+        <div class="report-line"><span>Total Students</span><strong>${data.total_students}</strong></div>
+        <div class="report-line"><span>Average GPA</span><strong>${data.average_gpa}</strong></div>
+        <div class="report-line"><span>Highest GPA</span><strong>${data.highest_gpa}</strong></div>
+        <div class="report-line"><span>Lowest GPA</span><strong>${data.lowest_gpa}</strong></div>
+        <div class="report-line"><span>Average Attendance</span><strong>${data.average_attendance}%</strong></div>
+    `;
+}
+
+// ================================================================
+// Report
+// ================================================================
+
+async function viewReport(id) {
+    const { ok, data: student } = await apiCall(`/report/${id}`);
+    if (!ok || !student) return;
+
+    const gradesHtml = Object.keys(student.grades).length
+        ? Object.entries(student.grades).map(([subject, marks]) =>
+            `<span class="grade-chip">${escapeHtml(subject)}: ${marks}</span>`
+          ).join(" ")
+        : "<em>No grades recorded</em>";
+
+    document.getElementById("reportContent").innerHTML = `
+        <div class="report-line"><span>Name</span><strong>${escapeHtml(student.name)}</strong></div>
+        <div class="report-line"><span>Age</span><strong>${student.age}</strong></div>
+        <div class="report-line"><span>Email</span><strong>${escapeHtml(student.email)}</strong></div>
+        <div class="report-line"><span>Course</span><strong>${escapeHtml(student.course)}</strong></div>
+        <div class="report-line"><span>GPA</span><strong>${student.gpa}</strong></div>
+        <div class="report-line"><span>Attendance</span><strong>${student.attendance.present} present / ${student.attendance.absent} absent (${student.attendance_percent}%)</strong></div>
+        <br>
+        <div><strong>Grades:</strong><br>${gradesHtml}</div>
+    `;
+
+    openModal("reportModal");
+}
+
+// ================================================================
+// Total Report (all students at once)
+// ================================================================
+
+let lastAllReports = [];
+
+async function viewAllReports() {
+    const { ok, data: students } = await apiCall("/reports");
+    if (!ok || !students) return;
+
+    lastAllReports = students;
+    const tbody = document.getElementById("allReportsTable");
+
+    if (students.length === 0) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No students yet.</td></tr>`;
+    } else {
+        tbody.innerHTML = students.map(s => {
+            const gpaClass = s.gpa === 0 ? "gpa-fail" : "";
+            const gradesHtml = Object.keys(s.grades).length
+                ? Object.entries(s.grades).map(([subject, marks]) =>
+                    `<span class="grade-chip">${escapeHtml(subject)}: ${marks}</span>`
+                  ).join(" ")
+                : "<em>No grades</em>";
+
+            return `
+                <tr>
+                    <td>${s.id}</td>
+                    <td>${escapeHtml(s.name)}</td>
+                    <td>${escapeHtml(s.course)}</td>
+                    <td class="${gpaClass}">${s.gpa}</td>
+                    <td>${s.attendance.present}P / ${s.attendance.absent}A (${s.attendance_percent}%)</td>
+                    <td>${gradesHtml}</td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    openModal("allReportsModal");
+}
+
+function printAllReports() {
+    if (!lastAllReports.length) {
+        showToast("No data to print", "error");
+        return;
+    }
+
+    const rows = lastAllReports.map(s => {
+        const grades = Object.entries(s.grades).map(([k, v]) => `${k}: ${v}`).join(", ") || "No grades";
+        return `<tr>
+            <td>${s.id}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.course)}</td>
+            <td>${s.gpa}</td><td>${s.attendance.present}P / ${s.attendance.absent}A (${s.attendance_percent}%)</td>
+            <td>${escapeHtml(grades)}</td>
+        </tr>`;
+    }).join("");
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+        <html><head><title>Total Report</title>
+        <style>
+            body{font-family:Arial,sans-serif;padding:20px;}
+            table{width:100%;border-collapse:collapse;}
+            th,td{border:1px solid #ccc;padding:8px;text-align:left;font-size:13px;}
+            th{background:#2563eb;color:white;}
+        </style></head><body>
+        <h1>Student Management System — Total Report</h1>
+        <table><thead><tr><th>ID</th><th>Name</th><th>Course</th><th>GPA</th><th>Attendance</th><th>Grades</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+        </body></html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// ================================================================
+// Init
+// ================================================================
+
+loadStudents();
+loadStatistics();
+</script>
+
+</body>
+</html>
