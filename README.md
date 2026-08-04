@@ -145,7 +145,7 @@ git clone https://github.com/Bishal1Dev/Student-Management-System.git
 Navigate into the project folder:
 
 ```bash
-cd Python-Project
+cd Student-Management-System
 ```
 
 ---
