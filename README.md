@@ -139,7 +139,7 @@ Python-Project/
 ## 1. Clone the Repository
 
 ```bash
-git clone [<repository-url>](https://github.com/Bishal1Dev/Student-Management-System.git)
+git clone https://github.com/Bishal1Dev/Student-Management-System.git
 ```
 
 Navigate into the project folder:
