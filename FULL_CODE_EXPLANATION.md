@@ -1,12 +1,3 @@
-I created the complete Markdown file for you.
-
-You can copy everything below into:
-
-```
-FULL_CODE_EXPLANATION.md
-```
-
-```md
 # Student Management System
 # Full Project Code Explanation
 
