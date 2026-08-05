@@ -11,7 +11,6 @@ from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 
 app = Flask(__name__)
-<<<<<<< HEAD
 
 # ==============================================================
 # Logging
@@ -87,7 +86,7 @@ def load_students():
 
     try:
         with open(DATA_FILE, "r", encoding="utf-8") as f:
-<<<<<<< HEAD
+
             content = f.read()
 
         if not content.strip():
@@ -147,7 +146,7 @@ def get_next_id(students):
     return max(s["id"] for s in students) + 1
 
 
-<<<<<<< HEAD
+
 def find_student(students: List[Dict[str, Any]], student_id: int) -> Optional[Dict[str, Any]]:
     """Return the student with the given id, or None."""
     for student in students:
@@ -167,7 +166,7 @@ def find_student(students, student_id):
 # GPA
 # ==============================================================
 
-<<<<<<< HEAD
+
 def marks_to_gpa_points(mark: float) -> float:
     """Convert a numeric mark (0-100) into GPA points."""
     if mark >= 90:
@@ -242,7 +241,7 @@ def calculate_attendance_percent(attendance):
 
 
 
-<<<<<<< HEAD
+
 def student_with_computed_fields(student: Dict[str, Any]) -> Dict[str, Any]:
     """Return a deep copy of the student with computed gpa/attendance_percent added."""
     data = deepcopy(student)
@@ -400,7 +399,7 @@ def handle_too_large(exc: Any) -> Any:
 
 
 # ==============================================================
-<<<<<<< HEAD
+
 # Auth guard (optional)
 # ==============================================================
 
@@ -429,7 +428,7 @@ def check_auth() -> Optional[Any]:
 # ==============================================================
 
 @app.route("/")
-<<<<<<< HEAD
+
 def home() -> Any:
     return send_file("index.html")
 
@@ -694,7 +693,7 @@ def get_student(student_id: int) -> Any:
 # ==============================================================
 
 @app.route("/students/<int:student_id>", methods=["PUT"])
-<<<<<<< HEAD
+
 def update_student(student_id: int) -> Any:
 =======
 def update_student(student_id):
@@ -710,7 +709,7 @@ def update_student(student_id):
 
 
     students = load_students()
-<<<<<<< HEAD
+
     student = find_student(students, student_id)
 =======
 
@@ -726,7 +725,7 @@ def update_student(student_id):
 
         return not_found_error()
 
-<<<<<<< HEAD
+
     try:
         if "name" in data:
             student["name"] = validate_name(data["name"])
@@ -869,7 +868,7 @@ def update_student(student_id):
     })
 
 
-<<<<<<< HEAD
+
 =======
 
 
@@ -879,7 +878,7 @@ def update_student(student_id):
 # DELETE STUDENT
 # ==============================================================
 
-<<<<<<< HEAD
+
 @app.route("/students/<int:student_id>", methods=["DELETE"])
 def delete_student(student_id: int) -> Any:
     students = load_students()
@@ -922,7 +921,7 @@ def delete_student(student_id):
     })
 
 
-<<<<<<< HEAD
+
 # ==============================================================
 # GRADES
 # ==============================================================
@@ -953,7 +952,7 @@ def add_grade():
 
 
     try:
-<<<<<<< HEAD
+
         student_id = parse_int(data.get("student_id"), "student_id must be a number")
         subject = str(data.get("subject") or "").strip()
         if not subject:
@@ -1052,7 +1051,7 @@ def add_grade():
     })
 
 
-<<<<<<< HEAD
+
 @app.route("/grades", methods=["DELETE"])
 def delete_grade() -> Any:
     """Delete a single subject grade for a student."""
@@ -1081,7 +1080,7 @@ def mark_attendance():
 
 
     try:
-<<<<<<< HEAD
+
         student_id = parse_int(data.get("student_id"), "student_id must be a number")
         subject = str(data.get("subject") or "").strip()
         if not subject:
@@ -1136,7 +1135,7 @@ def mark_attendance():
 
         return not_found_error()
 
-<<<<<<< HEAD
+
     if subject not in student.get("grades", {}):
         return not_found_error(f"Subject '{subject}' not found for this student")
 
@@ -1207,7 +1206,7 @@ def mark_attendance() -> Any:
     })
 
 
-<<<<<<< HEAD
+
 # ==============================================================
 # STATISTICS
 # ==============================================================
@@ -1247,7 +1246,7 @@ def statistics():
 
         })
 
-<<<<<<< HEAD
+
     gpas = [calculate_gpa(s.get("grades", {})) for s in students]
     attendance = [calculate_attendance_percent(s.get("attendance", {})) for s in students]
 =======
@@ -1283,7 +1282,7 @@ def statistics():
 
 
     return jsonify({
-<<<<<<< HEAD
+
         "total_students": len(students),
         "average_gpa": round(sum(gpas) / len(gpas), 2),
         "highest_gpa": max(gpas),
@@ -1354,7 +1353,7 @@ def report(student_id):
     if student is None:
 
         return not_found_error()
-<<<<<<< HEAD
+
     return jsonify(student_with_computed_fields(student))
 
 
@@ -1393,7 +1392,7 @@ def all_reports():
 
 
 # ==============================================================
-<<<<<<< HEAD
+
 # ANALYTICS / DISTRIBUTION
 # ==============================================================
 
@@ -1436,7 +1435,7 @@ def grade_distribution() -> Any:
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
+
 =======
 
 
@@ -1445,7 +1444,7 @@ if __name__ == "__main__":
 
         save_students([])
 
-<<<<<<< HEAD
+
     app.run(host=HOST, port=PORT, debug=DEBUG)
 =======
 
