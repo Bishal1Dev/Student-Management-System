@@ -79,7 +79,7 @@ DATA_FILE = os.path.join(
 
 
 def load_students():
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     if not os.path.exists(DATA_FILE):
         save_students([])
         return []
@@ -139,7 +139,7 @@ def save_students(students):
 
 
 def get_next_id(students):
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     if not students:
         return 1
 
@@ -158,7 +158,7 @@ def find_student(students, student_id):
         if student["id"] == student_id:
             return student
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     return None
 
 
@@ -231,7 +231,7 @@ def calculate_attendance_percent(attendance):
     present = attendance.get("present",0)
     absent = attendance.get("absent",0)
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     total = present + absent
 
     if total == 0:
@@ -378,7 +378,7 @@ def not_found_error(message="Student not found"):
         "error":message
     }),404
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
 
 
 def auth_error() -> Any:
@@ -625,7 +625,7 @@ def add_student():
 
     students = load_students()
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
 
     new_student = {
 
@@ -691,7 +691,7 @@ def update_student(student_id: int) -> Any:
 =======
 def update_student(student_id):
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     data = request.get_json(silent=True)
 
 
@@ -713,7 +713,7 @@ def update_student(student_id):
     )
 
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     if student is None:
 
         return not_found_error()
@@ -842,7 +842,7 @@ def update_student(student_id):
         student["age"] = age
 
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
 
     save_students(students)
 
@@ -866,7 +866,7 @@ def update_student(student_id):
 
 
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
 # ==============================================================
 # DELETE STUDENT
 # ==============================================================
@@ -890,7 +890,7 @@ def delete_student(student_id):
     )
 
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     if student is None:
 
         return not_found_error()
@@ -933,7 +933,7 @@ def add_grade() -> Any:
 @app.route("/grades", methods=["POST"])
 def add_grade():
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     data = request.get_json(silent=True)
 
 
@@ -1017,7 +1017,7 @@ def add_grade():
     )
 
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     if student is None:
 
         return not_found_error()
@@ -1060,7 +1060,7 @@ def delete_grade() -> Any:
 @app.route("/attendance", methods=["POST"])
 def mark_attendance():
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     data = request.get_json(silent=True)
 
 
@@ -1123,7 +1123,7 @@ def mark_attendance():
 
 
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     if student is None:
 
         return not_found_error()
@@ -1181,7 +1181,7 @@ def mark_attendance() -> Any:
     student["attendance"][status] += 1
 
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     save_students(students)
 
 
@@ -1218,7 +1218,7 @@ def statistics() -> Any:
 @app.route("/statistics", methods=["GET"])
 def statistics():
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     students = load_students()
 
 
@@ -1255,7 +1255,7 @@ def statistics():
         for s in students
 
     ]
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
 
 
 
@@ -1342,7 +1342,7 @@ def report(student_id):
     )
 
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     if student is None:
 
         return not_found_error()
@@ -1368,7 +1368,7 @@ def all_reports() -> Any:
 @app.route("/reports", methods=["GET"])
 def all_reports():
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     students = load_students()
 
 
@@ -1422,7 +1422,7 @@ def grade_distribution() -> Any:
 
 # ==============================================================
 =======
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
 # START SERVER
 # ==============================================================
 
@@ -1432,7 +1432,7 @@ if __name__ == "__main__":
 =======
 
 
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
     if not os.path.exists(DATA_FILE):
 
         save_students([])
@@ -1447,4 +1447,4 @@ if __name__ == "__main__":
         port=5000,
         debug=True
     )
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
+
