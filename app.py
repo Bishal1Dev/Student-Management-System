@@ -65,7 +65,7 @@ def load_students() -> List[Dict[str, Any]]:
     corrupt, it is moved to a backup file and the server returns a 500
     via a raised exception so no data is silently wiped on the next save.
     """
-=======
+
 CORS(app)
 
 # ==============================================================
@@ -419,13 +419,6 @@ def check_auth() -> Optional[Any]:
     if request.path == "/" or request.method == "OPTIONS":
         return None
     return require_api_key()
-
-
-# ==============================================================
-=======
->>>>>>> a6e90f73f78e7831bdab0c5e83ee4cdb720efef6
-# HOME
-# ==============================================================
 
 @app.route("/")
 
