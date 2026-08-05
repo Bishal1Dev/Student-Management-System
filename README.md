@@ -21,6 +21,7 @@ This project allows users to manage student records, track grades, calculate GPA
 
 - Add subject grades
 - Update student marks
+- Delete individual subject grades
 - Automatically calculate GPA
 - Support multiple subjects
 
@@ -29,6 +30,7 @@ This project allows users to manage student records, track grades, calculate GPA
 
 - Mark student attendance
 - Track present and absent days
+- Prevent double-marking attendance on the same day
 - Automatically calculate attendance percentage
 
 
@@ -42,6 +44,24 @@ This project allows users to manage student records, track grades, calculate GPA
   - Highest GPA
   - Lowest GPA
   - Average attendance
+  - Grade distribution across GPA bands
+
+## Search, Sort & Pagination
+
+- Search students by name or course (`GET /students?q=`)
+- Sort by name, GPA, or attendance (`?sort=&order=`)
+- Paginate results (`?page=&per_page=`)
+
+## Data Safety & Security
+
+- Atomic, thread-safe writes to `students.json`
+- Corrupt files are backed up instead of silently wiped
+- Duplicate email detection on add/update
+- Per-day attendance tracking (prevents double-marking same day)
+- Delete individual subject grades
+- Optional API key auth (set `API_KEY` env var)
+- Restrict CORS origins (via `ALLOWED_ORIGINS` env var)
+- Request body size limit
 
 
 ---
@@ -194,6 +214,41 @@ Open the link in your browser.
 
 ---
 
+# Configuration (Environment Variables)
+
+The server behavior can be customized with environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `HOST` | `0.0.0.0` | Interface to bind the server to |
+| `PORT` | `5000` | Port to run the server on |
+| `FLASK_DEBUG` | `0` | Set to `1` to enable debug mode |
+| `ALLOWED_ORIGINS` | `http://127.0.0.1:5000,http://localhost:5000` | Comma-separated list of allowed CORS origins |
+| `API_KEY` | *(empty)* | If set, all API requests must include the `X-API-Key` header |
+
+Example (PowerShell):
+
+```powershell
+$env:PORT = "8080"
+$env:FLASK_DEBUG = "1"
+$env:API_KEY = "my-secret-key"
+python app.py
+```
+
+Example (bash):
+
+```bash
+PORT=8080 FLASK_DEBUG=1 API_KEY=my-secret-key python app.py
+```
+
+When `API_KEY` is set, send it with every request:
+
+```
+X-API-Key: my-secret-key
+```
+
+---
+
 # API Endpoints
 
 ## Student Management
@@ -205,6 +260,19 @@ GET /students
 ```
 
 Returns all student records.
+
+Optional query parameters:
+- `?q=<text>` — search by name or course
+- `?sort=name|gpa|attendance&order=asc|desc` — sort results
+
+
+### Get Single Student
+
+```
+GET /students/<student_id>
+```
+
+Returns one student record.
 
 
 ### Add Student
@@ -245,6 +313,24 @@ POST /grades
 ```
 
 Adds or updates student marks.
+
+
+### Delete Grade
+
+```
+DELETE /grades
+```
+
+Deletes a single subject grade for a student.
+
+Request body:
+
+```json
+{
+  "student_id": 1,
+  "subject": "Python"
+}
+```
 
 
 ---

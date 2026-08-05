@@ -1,10 +1,10 @@
 [
   {
     "id": 1,
-    "name": "test",
-    "age": 21,
+    "name": "Bishal",
+    "age": 23,
     "email": "bishallamichhane158@gmail.com",
-    "course": "test",
+    "course": "IT",
     "grades": {},
     "attendance": {
       "present": 0,

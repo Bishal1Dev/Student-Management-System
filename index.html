@@ -32,6 +32,8 @@ nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 #connectionStatus {
@@ -131,6 +133,11 @@ input, select {
     min-width: 140px;
 }
 
+input:focus, select:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 1px;
+}
+
 button {
     background: #2563eb;
     color: white;
@@ -142,6 +149,11 @@ button {
 
 button:hover {
     background: #1d4ed8;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 button.secondary {
@@ -170,6 +182,11 @@ button.edit {
 }
 button.edit:hover {
     background: #b45309;
+}
+
+/* Field error styling */
+.field-error {
+    border: 2px solid #dc2626 !important;
 }
 
 /* ============================================================
@@ -228,6 +245,34 @@ tbody tr:hover {
     border-radius: 12px;
     font-size: 12px;
     margin: 2px;
+}
+
+.grade-chip .remove-grade {
+    margin-left: 4px;
+    cursor: pointer;
+    color: #dc2626;
+    font-weight: bold;
+    background: none;
+    border: none;
+    padding: 0 2px;
+}
+
+/* ============================================================
+   Skeleton loading
+============================================================ */
+.skeleton {
+    display: inline-block;
+    width: 60px;
+    height: 14px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 /* ============================================================
@@ -316,7 +361,7 @@ tbody tr:hover {
 
 <nav>
     <span>🎓 Student Management System</span>
-    <span id="connectionStatus">Connecting...</span>
+    <span id="connectionStatus" role="status">Connecting...</span>
 </nav>
 
 <div class="container">
@@ -325,39 +370,42 @@ tbody tr:hover {
     <div class="cards">
         <div class="card">
             <h3>Total Students</h3>
-            <p id="totalStudents">0</p>
+            <p id="totalStudents"><span class="skeleton"></span></p>
         </div>
         <div class="card">
             <h3>Average GPA</h3>
-            <p id="averageGPA">0</p>
+            <p id="averageGPA"><span class="skeleton"></span></p>
         </div>
         <div class="card">
             <h3>Avg Attendance</h3>
-            <p id="attendance">0%</p>
+            <p id="attendance"><span class="skeleton"></span></p>
         </div>
         <div class="card">
             <h3>Highest / Lowest GPA</h3>
-            <p style="font-size:20px;"><span id="highestGPA">0</span> / <span id="lowestGPA">0</span></p>
+            <p style="font-size:20px;"><span id="highestGPA"><span class="skeleton"></span></span> / <span id="lowestGPA"><span class="skeleton"></span></span></p>
         </div>
     </div>
 
     <!-- Add Student -->
     <div class="section">
         <h2>Add Student</h2>
-        <div class="form-row">
-            <input id="name" placeholder="Name">
-            <input id="age" type="number" placeholder="Age" min="0">
-            <input id="email" type="email" placeholder="Email">
-            <input id="course" placeholder="Course">
-            <button onclick="addStudent()">Add Student</button>
-        </div>
+        <form id="addStudentForm" class="form-row" onsubmit="handleAddStudent(event)">
+            <input id="name" placeholder="Name" aria-label="Name" required>
+            <input id="age" type="number" placeholder="Age" min="1" max="100" aria-label="Age" required>
+            <input id="email" type="email" placeholder="Email" aria-label="Email" required>
+            <input id="course" placeholder="Course" aria-label="Course" required>
+            <button type="submit">Add Student</button>
+        </form>
     </div>
 
     <!-- Student Table -->
     <div class="section">
         <div class="section-header">
             <h2>Students</h2>
-            <button onclick="viewAllReports()">📊 Total Report</button>
+            <div class="form-row" style="flex:1;min-width:200px;">
+                <input id="searchInput" placeholder="🔍 Search by name or course..." aria-label="Search students" oninput="handleSearch()">
+                <button class="secondary" onclick="viewAllReports()">📊 Total Report</button>
+            </div>
         </div>
         <div class="table-wrap">
             <table>
@@ -372,7 +420,7 @@ tbody tr:hover {
                     </tr>
                 </thead>
                 <tbody id="studentTable">
-                    <tr class="empty-row"><td colspan="6">Loading students...</td></tr>
+                    <tr class="empty-row"><td colspan="6"><span class="skeleton"></span> Loading students...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -381,12 +429,12 @@ tbody tr:hover {
     <!-- Grade Section -->
     <div class="section">
         <h2>Add Grade</h2>
-        <div class="form-row">
-            <select id="gradeStudent"></select>
-            <input id="subject" placeholder="Subject">
-            <input id="marks" type="number" placeholder="Marks (0-100)" min="0" max="100">
-            <button onclick="addGrade()">Add Grade</button>
-        </div>
+        <form id="addGradeForm" class="form-row" onsubmit="handleAddGrade(event)">
+            <select id="gradeStudent" aria-label="Select student"></select>
+            <input id="subject" placeholder="Subject" aria-label="Subject" required>
+            <input id="marks" type="number" placeholder="Marks (0-100)" min="0" max="100" aria-label="Marks" required>
+            <button type="submit">Add Grade</button>
+        </form>
     </div>
 
     <!-- Attendance -->
@@ -405,22 +453,28 @@ tbody tr:hover {
                     </tr>
                 </thead>
                 <tbody id="attendanceTable">
-                    <tr class="empty-row"><td colspan="6">Loading...</td></tr>
+                    <tr class="empty-row"><td colspan="6"><span class="skeleton"></span> Loading...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Statistics -->
+<!-- Statistics -->
     <div class="section">
         <h2>Statistics</h2>
-        <div id="statistics">Loading...</div>
+        <div id="statistics"><span class="skeleton"></span> Loading...</div>
+    </div>
+
+    <!-- Grade Distribution -->
+    <div class="section">
+        <h2>Grade Distribution</h2>
+        <div id="distribution"><span class="skeleton"></span> Loading...</div>
     </div>
 
 </div>
 
 <!-- Toast -->
-<div id="toast"></div>
+<div id="toast" aria-live="polite"></div>
 
 <!-- Report Modal -->
 <div class="modal-overlay" id="reportModal">
@@ -464,10 +518,10 @@ tbody tr:hover {
     <div class="modal">
         <h2>Edit Student</h2>
         <input type="hidden" id="editId">
-        <div class="form-row"><input id="editName" placeholder="Name"></div>
-        <div class="form-row"><input id="editAge" type="number" placeholder="Age"></div>
-        <div class="form-row"><input id="editEmail" type="email" placeholder="Email"></div>
-        <div class="form-row"><input id="editCourse" placeholder="Course"></div>
+        <div class="form-row"><input id="editName" placeholder="Name" aria-label="Name"></div>
+        <div class="form-row"><input id="editAge" type="number" placeholder="Age" min="1" max="100" aria-label="Age"></div>
+        <div class="form-row"><input id="editEmail" type="email" placeholder="Email" aria-label="Email"></div>
+        <div class="form-row"><input id="editCourse" placeholder="Course" aria-label="Course"></div>
         <div class="form-row">
             <button onclick="saveEdit()">Save Changes</button>
             <button class="modal-close" onclick="closeModal('editModal')">Cancel</button>
@@ -528,6 +582,41 @@ function openModal(id) {
     document.getElementById(id).classList.add("active");
 }
 
+// Escape all user-controlled text to prevent XSS.
+// Entity strings are built at runtime via char codes so the source file
+// never contains literal HTML entity text (which could be misinterpreted).
+function escapeHtml(str) {
+    if (str === undefined || str === null) return "";
+    var c = String.fromCharCode;
+    var amp = c(38);
+    var map = {
+        [amp]: amp + "amp;",
+        [c(60)]: amp + "lt;",
+        [c(62)]: amp + "gt;",
+        [c(34)]: amp + "quot;",
+        [c(39)]: amp + "#039;"
+    };
+    return String(str).replace(/[&<>"']/g, function (m) { return map[m]; });
+}
+
+// Mark/unmark a field with an error style.
+function setFieldError(inputId, hasError) {
+    const el = document.getElementById(inputId);
+    if (el) el.classList.toggle("field-error", hasError);
+}
+
+function clearFieldErrors() {
+    document.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
+}
+
+// ================================================================
+// State
+// ================================================================
+
+let allStudents = [];
+let searchTerm = "";
+let lastAllReports = [];
+
 // ================================================================
 // Load Students
 // ================================================================
@@ -536,31 +625,37 @@ async function loadStudents() {
     const { ok, data: students } = await apiCall("/students");
     if (!ok || !students) return;
 
+    allStudents = students;
+    renderStudentTable();
+    renderGradeSelect();
+    renderAttendanceTable();
+}
+
+function renderStudentTable() {
     const table = document.getElementById("studentTable");
-    const gradeSelect = document.getElementById("gradeStudent");
-    const attendanceTable = document.getElementById("attendanceTable");
+    const filtered = searchTerm
+        ? allStudents.filter(s =>
+            (s.name || "").toLowerCase().includes(searchTerm) ||
+            (s.course || "").toLowerCase().includes(searchTerm)
+        )
+        : allStudents;
 
-    table.innerHTML = "";
-    gradeSelect.innerHTML = "";
-    attendanceTable.innerHTML = "";
-
-    if (students.length === 0) {
-        table.innerHTML = `<tr class="empty-row"><td colspan="6">No students yet. Add one above.</td></tr>`;
-        gradeSelect.innerHTML = `<option value="">No students</option>`;
-        attendanceTable.innerHTML = `<tr class="empty-row"><td colspan="6">No students yet. Add one above.</td></tr>`;
+    if (filtered.length === 0) {
+        table.innerHTML = `<tr class="empty-row"><td colspan="6">${
+            searchTerm ? "No students match your search." : "No students yet. Add one above."
+        }</td></tr>`;
         return;
     }
 
-    students.forEach(student => {
+    table.innerHTML = filtered.map(student => {
         const gpaClass = student.gpa === 0 ? "gpa-fail" : "";
-
-        table.innerHTML += `
+        return `
             <tr>
-                <td>${student.id}</td>
+                <td>${escapeHtml(student.id)}</td>
                 <td>${escapeHtml(student.name)}</td>
                 <td>${escapeHtml(student.course)}</td>
-                <td class="${gpaClass}">${student.gpa}</td>
-                <td>${student.attendance_percent}%</td>
+                <td class="${gpaClass}">${escapeHtml(student.gpa)}</td>
+                <td>${escapeHtml(student.attendance_percent)}%</td>
                 <td>
                     <div class="action-buttons">
                         <button class="edit" onclick="openEdit(${student.id})">Edit</button>
@@ -570,64 +665,82 @@ async function loadStudents() {
                 </td>
             </tr>
         `;
-
-        gradeSelect.innerHTML += `<option value="${student.id}">${escapeHtml(student.name)}</option>`;
-
-        attendanceTable.innerHTML += `
-            <tr>
-                <td>${student.id}</td>
-                <td>${escapeHtml(student.name)}</td>
-                <td>${student.attendance.present}</td>
-                <td>${student.attendance.absent}</td>
-                <td>${student.attendance_percent}%</td>
-                <td>
-                    <div class="action-buttons">
-                        <button onclick="markAttendance(${student.id}, 'present')">✅ Present</button>
-                        <button class="delete" onclick="markAttendance(${student.id}, 'absent')">❌ Absent</button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    });
+    }).join("");
 }
 
-function escapeHtml(str) {
-    if (str === undefined || str === null) return "";
-    return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+function renderGradeSelect() {
+    const gradeSelect = document.getElementById("gradeStudent");
+    if (!allStudents.length) {
+        gradeSelect.innerHTML = `<option value="">No students</option>`;
+        return;
+    }
+    gradeSelect.innerHTML = allStudents.map(s =>
+        `<option value="${s.id}">${escapeHtml(s.name)}</option>`
+    ).join("");
+}
+
+function renderAttendanceTable() {
+    const attendanceTable = document.getElementById("attendanceTable");
+    if (allStudents.length === 0) {
+        attendanceTable.innerHTML = `<tr class="empty-row"><td colspan="6">No students yet. Add one above.</td></tr>`;
+        return;
+    }
+
+    attendanceTable.innerHTML = allStudents.map(student => `
+        <tr>
+            <td>${escapeHtml(student.id)}</td>
+            <td>${escapeHtml(student.name)}</td>
+            <td>${escapeHtml(student.attendance.present)}</td>
+            <td>${escapeHtml(student.attendance.absent)}</td>
+            <td>${escapeHtml(student.attendance_percent)}%</td>
+            <td>
+                <div class="action-buttons">
+                    <button onclick="markAttendance(${student.id}, 'present')">✅ Present</button>
+                    <button class="delete" onclick="markAttendance(${student.id}, 'absent')">❌ Absent</button>
+                </div>
+            </td>
+        </tr>
+    `).join("");
+}
+
+function handleSearch() {
+    searchTerm = document.getElementById("searchInput").value.trim().toLowerCase();
+    renderStudentTable();
 }
 
 // ================================================================
 // Add Student
 // ================================================================
 
-async function addStudent() {
+async function handleAddStudent(event) {
+    event.preventDefault();
+    clearFieldErrors();
+
     const name = document.getElementById("name").value.trim();
     const age = document.getElementById("age").value;
     const email = document.getElementById("email").value.trim();
     const course = document.getElementById("course").value.trim();
 
-    if (!name || !course) {
-        showToast("Name and Course are required", "error");
-        return;
-    }
+    let valid = true;
+    if (!name) { setFieldError("name", true); valid = false; }
+    if (!course) { setFieldError("course", true); valid = false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setFieldError("email", true); valid = false; }
+    const ageNum = Number(age);
+    if (!age || ageNum < 1 || ageNum > 100) { setFieldError("age", true); valid = false; }
+    if (!valid) { showToast("Please fix the highlighted fields", "error"); return; }
 
-    const { ok } = await apiCall("/students", {
+const { ok, data } = await apiCall("/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, age: Number(age) || 0, email, course })
+        body: JSON.stringify({ name, age: ageNum, email, course })
     });
 
     if (ok) {
         showToast("Student added");
-        document.getElementById("name").value = "";
-        document.getElementById("age").value = "";
-        document.getElementById("email").value = "";
-        document.getElementById("course").value = "";
+        document.getElementById("addStudentForm").reset();
         loadStudents();
         loadStatistics();
+        loadDistribution();
     }
 }
 
@@ -635,15 +748,9 @@ async function addStudent() {
 // Edit Student
 // ================================================================
 
-let currentStudents = [];
-
 async function openEdit(id) {
-    const { ok, data: students } = await apiCall("/students");
-    if (!ok) return;
-    currentStudents = students;
-
-    const student = students.find(s => s.id === id);
-    if (!student) return;
+    const { ok, data: student } = await apiCall(`/students/${id}`);
+    if (!ok || !student) return;
 
     document.getElementById("editId").value = student.id;
     document.getElementById("editName").value = student.name;
@@ -655,23 +762,33 @@ async function openEdit(id) {
 }
 
 async function saveEdit() {
+    clearFieldErrors();
     const id = document.getElementById("editId").value;
     const name = document.getElementById("editName").value.trim();
     const age = document.getElementById("editAge").value;
     const email = document.getElementById("editEmail").value.trim();
     const course = document.getElementById("editCourse").value.trim();
 
+    let valid = true;
+    if (!name) { setFieldError("editName", true); valid = false; }
+    if (!course) { setFieldError("editCourse", true); valid = false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setFieldError("editEmail", true); valid = false; }
+    const ageNum = Number(age);
+    if (!age || ageNum < 1 || ageNum > 100) { setFieldError("editAge", true); valid = false; }
+    if (!valid) { showToast("Please fix the highlighted fields", "error"); return; }
+
     const { ok } = await apiCall(`/students/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, age: Number(age) || 0, email, course })
+        body: JSON.stringify({ name, age: ageNum, email, course })
     });
 
-    if (ok) {
+if (ok) {
         showToast("Student updated");
         closeModal("editModal");
         loadStudents();
         loadStatistics();
+        loadDistribution();
     }
 }
 
@@ -683,10 +800,11 @@ async function deleteStudent(id) {
     if (!confirm("Delete this student? This cannot be undone.")) return;
 
     const { ok } = await apiCall(`/students/${id}`, { method: "DELETE" });
-    if (ok) {
+if (ok) {
         showToast("Student deleted");
         loadStudents();
         loadStatistics();
+        loadDistribution();
     }
 }
 
@@ -694,7 +812,10 @@ async function deleteStudent(id) {
 // Add Grade
 // ================================================================
 
-async function addGrade() {
+async function handleAddGrade(event) {
+    event.preventDefault();
+    clearFieldErrors();
+
     const studentId = document.getElementById("gradeStudent").value;
     const subject = document.getElementById("subject").value.trim();
     const marks = document.getElementById("marks").value;
@@ -703,8 +824,12 @@ async function addGrade() {
         showToast("Add a student first", "error");
         return;
     }
-    if (!subject || marks === "") {
-        showToast("Subject and Marks are required", "error");
+    if (!subject) { setFieldError("subject", true); }
+    if (marks === "" ) { setFieldError("marks", true); }
+    const marksNum = Number(marks);
+    if (marks === "" || marksNum < 0 || marksNum > 100) { setFieldError("marks", true); }
+    if (!subject || marks === "" || marksNum < 0 || marksNum > 100) {
+        showToast("Valid subject and marks (0-100) are required", "error");
         return;
     }
 
@@ -714,16 +839,38 @@ async function addGrade() {
         body: JSON.stringify({
             student_id: Number(studentId),
             subject,
-            marks: Number(marks)
+            marks: marksNum
         })
     });
 
-    if (ok) {
+if (ok) {
         showToast("Grade added");
-        document.getElementById("subject").value = "";
-        document.getElementById("marks").value = "";
+        document.getElementById("addGradeForm").reset();
         loadStudents();
         loadStatistics();
+        loadDistribution();
+    }
+}
+
+// ================================================================
+// Delete Grade
+// ================================================================
+
+async function deleteGrade(studentId, subject) {
+    if (!confirm(`Delete grade for "${subject}" from this student?`)) return;
+
+    const { ok } = await apiCall("/grades", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_id: Number(studentId), subject })
+    });
+
+if (ok) {
+        showToast("Grade deleted");
+        closeModal("reportModal");
+        loadStudents();
+        loadStatistics();
+        loadDistribution();
     }
 }
 
@@ -738,10 +885,11 @@ async function markAttendance(studentId, status) {
         body: JSON.stringify({ student_id: Number(studentId), status })
     });
 
-    if (ok) {
+if (ok) {
         showToast(`Marked ${status}`);
         loadStudents();
         loadStatistics();
+        loadDistribution();
     }
 }
 
@@ -760,12 +908,36 @@ async function loadStatistics() {
     document.getElementById("lowestGPA").textContent = data.lowest_gpa;
 
     document.getElementById("statistics").innerHTML = `
-        <div class="report-line"><span>Total Students</span><strong>${data.total_students}</strong></div>
-        <div class="report-line"><span>Average GPA</span><strong>${data.average_gpa}</strong></div>
-        <div class="report-line"><span>Highest GPA</span><strong>${data.highest_gpa}</strong></div>
-        <div class="report-line"><span>Lowest GPA</span><strong>${data.lowest_gpa}</strong></div>
-        <div class="report-line"><span>Average Attendance</span><strong>${data.average_attendance}%</strong></div>
+        <div class="report-line"><span>Total Students</span><strong>${escapeHtml(data.total_students)}</strong></div>
+        <div class="report-line"><span>Average GPA</span><strong>${escapeHtml(data.average_gpa)}</strong></div>
+        <div class="report-line"><span>Highest GPA</span><strong>${escapeHtml(data.highest_gpa)}</strong></div>
+        <div class="report-line"><span>Lowest GPA</span><strong>${escapeHtml(data.lowest_gpa)}</strong></div>
+        <div class="report-line"><span>Average Attendance</span><strong>${escapeHtml(data.average_attendance)}%</strong></div>
     `;
+}
+
+// ================================================================
+// Grade Distribution
+// ================================================================
+
+async function loadDistribution() {
+    const { ok, data } = await apiCall("/distribution");
+    if (!ok || !data) return;
+
+    const bands = data.bands || {};
+    const total = data.total || 0;
+
+    const rows = Object.entries(bands).map(([label, count]) => {
+        const pct = total ? Math.round((count / total) * 100) : 0;
+        return `
+            <div class="report-line">
+                <span>${escapeHtml(label)}</span>
+                <strong>${escapeHtml(count)} ${pct}%</strong>
+            </div>
+        `;
+    }).join("");
+
+    document.getElementById("distribution").innerHTML = rows;
 }
 
 // ================================================================
@@ -778,17 +950,19 @@ async function viewReport(id) {
 
     const gradesHtml = Object.keys(student.grades).length
         ? Object.entries(student.grades).map(([subject, marks]) =>
-            `<span class="grade-chip">${escapeHtml(subject)}: ${marks}</span>`
+            `<span class="grade-chip">${escapeHtml(subject)}: ${escapeHtml(marks)}
+                <button class="remove-grade" title="Delete grade" onclick="deleteGrade(${student.id}, '${escapeAttr(subject)}')">×</button>
+            </span>`
           ).join(" ")
         : "<em>No grades recorded</em>";
 
     document.getElementById("reportContent").innerHTML = `
         <div class="report-line"><span>Name</span><strong>${escapeHtml(student.name)}</strong></div>
-        <div class="report-line"><span>Age</span><strong>${student.age}</strong></div>
+        <div class="report-line"><span>Age</span><strong>${escapeHtml(student.age)}</strong></div>
         <div class="report-line"><span>Email</span><strong>${escapeHtml(student.email)}</strong></div>
         <div class="report-line"><span>Course</span><strong>${escapeHtml(student.course)}</strong></div>
-        <div class="report-line"><span>GPA</span><strong>${student.gpa}</strong></div>
-        <div class="report-line"><span>Attendance</span><strong>${student.attendance.present} present / ${student.attendance.absent} absent (${student.attendance_percent}%)</strong></div>
+        <div class="report-line"><span>GPA</span><strong>${escapeHtml(student.gpa)}</strong></div>
+        <div class="report-line"><span>Attendance</span><strong>${escapeHtml(student.attendance.present)} present / ${escapeHtml(student.attendance.absent)} absent (${escapeHtml(student.attendance_percent)}%)</strong></div>
         <br>
         <div><strong>Grades:</strong><br>${gradesHtml}</div>
     `;
@@ -796,11 +970,14 @@ async function viewReport(id) {
     openModal("reportModal");
 }
 
+// Escape a string for use inside a JS string in an HTML attribute.
+function escapeAttr(str) {
+    return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+}
+
 // ================================================================
 // Total Report (all students at once)
 // ================================================================
-
-let lastAllReports = [];
 
 async function viewAllReports() {
     const { ok, data: students } = await apiCall("/reports");
@@ -816,17 +993,17 @@ async function viewAllReports() {
             const gpaClass = s.gpa === 0 ? "gpa-fail" : "";
             const gradesHtml = Object.keys(s.grades).length
                 ? Object.entries(s.grades).map(([subject, marks]) =>
-                    `<span class="grade-chip">${escapeHtml(subject)}: ${marks}</span>`
+                    `<span class="grade-chip">${escapeHtml(subject)}: ${escapeHtml(marks)}</span>`
                   ).join(" ")
                 : "<em>No grades</em>";
 
             return `
                 <tr>
-                    <td>${s.id}</td>
+                    <td>${escapeHtml(s.id)}</td>
                     <td>${escapeHtml(s.name)}</td>
                     <td>${escapeHtml(s.course)}</td>
-                    <td class="${gpaClass}">${s.gpa}</td>
-                    <td>${s.attendance.present}P / ${s.attendance.absent}A (${s.attendance_percent}%)</td>
+                    <td class="${gpaClass}">${escapeHtml(s.gpa)}</td>
+                    <td>${escapeHtml(s.attendance.present)}P / ${escapeHtml(s.attendance.absent)}A (${escapeHtml(s.attendance_percent)}%)</td>
                     <td>${gradesHtml}</td>
                 </tr>
             `;
@@ -845,8 +1022,8 @@ function printAllReports() {
     const rows = lastAllReports.map(s => {
         const grades = Object.entries(s.grades).map(([k, v]) => `${k}: ${v}`).join(", ") || "No grades";
         return `<tr>
-            <td>${s.id}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.course)}</td>
-            <td>${s.gpa}</td><td>${s.attendance.present}P / ${s.attendance.absent}A (${s.attendance_percent}%)</td>
+            <td>${escapeHtml(s.id)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.course)}</td>
+            <td>${escapeHtml(s.gpa)}</td><td>${escapeHtml(s.attendance.present)}P / ${escapeHtml(s.attendance.absent)}A (${escapeHtml(s.attendance_percent)}%)</td>
             <td>${escapeHtml(grades)}</td>
         </tr>`;
     }).join("");
@@ -875,6 +1052,7 @@ function printAllReports() {
 
 loadStudents();
 loadStatistics();
+loadDistribution();
 </script>
 
 </body>
